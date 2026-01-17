@@ -1,4 +1,3 @@
-cat > db/engine.js << 'EOF'
 const { loadSchema, saveSchema, createTable, loadTable, saveTable } = require("./storage");
 
 function execute(sql) {
@@ -109,6 +108,112 @@ function execute(sql) {
     }
   }
 
+  // ADD UPDATE operation
+  if (sql.toUpperCase().startsWith("UPDATE")) {
+    const match = sql.match(/UPDATE (\w+) SET (.+)(?:\s+WHERE (.+))?/i);
+    if (!match) throw new Error("Invalid UPDATE syntax");
+
+    const tableName = match[1];
+    const setClause = match[2];
+    const whereClause = match[3];
+
+    const schema = loadSchema();
+    if (!schema[tableName]) {
+      throw new Error(`Table ${tableName} does not exist`);
+    }
+
+    // Parse SET clause: col1=val1, col2=val2
+    const updates = {};
+    const setParts = setClause.split(",").map(s => s.trim());
+    setParts.forEach(part => {
+      const [col, val] = part.split("=").map(s => s.trim());
+      let value = val;
+      if ((val.startsWith("'") && val.endsWith("'")) || 
+          (val.startsWith('"') && val.endsWith('"'))) {
+        value = val.slice(1, -1);
+      } else {
+        const num = Number(val);
+        if (!isNaN(num)) value = num;
+      }
+      updates[col] = value;
+    });
+
+    let rows = loadTable(tableName);
+    let updatedCount = 0;
+
+    if (whereClause) {
+      const condMatch = whereClause.match(/(\w+)\s*=\s*(.+)/);
+      if (condMatch) {
+        const col = condMatch[1];
+        let val = condMatch[2].trim();
+        if ((val.startsWith("'") && val.endsWith("'")) || 
+            (val.startsWith('"') && val.endsWith('"'))) {
+          val = val.slice(1, -1);
+        }
+        const num = Number(val);
+        const compareVal = isNaN(num) ? val : num;
+        
+        rows.forEach(row => {
+          if (row[col] == compareVal) {
+            Object.assign(row, updates);
+            updatedCount++;
+          }
+        });
+      }
+    } else {
+      // Update all rows if no WHERE clause
+      rows.forEach(row => {
+        Object.assign(row, updates);
+        updatedCount++;
+      });
+    }
+
+    saveTable(tableName, rows);
+    return `${updatedCount} row(s) updated in ${tableName}`;
+  }
+
+  // ADD DELETE operation
+  if (sql.toUpperCase().startsWith("DELETE FROM")) {
+    const match = sql.match(/DELETE FROM (\w+)(?:\s+WHERE (.+))?/i);
+    if (!match) throw new Error("Invalid DELETE syntax");
+
+    const tableName = match[1];
+    const whereClause = match[2];
+
+    const schema = loadSchema();
+    if (!schema[tableName]) {
+      throw new Error(`Table ${tableName} does not exist`);
+    }
+
+    let rows = loadTable(tableName);
+    let deletedCount = 0;
+
+    if (whereClause) {
+      const condMatch = whereClause.match(/(\w+)\s*=\s*(.+)/);
+      if (condMatch) {
+        const col = condMatch[1];
+        let val = condMatch[2].trim();
+        if ((val.startsWith("'") && val.endsWith("'")) || 
+            (val.startsWith('"') && val.endsWith('"'))) {
+          val = val.slice(1, -1);
+        }
+        const num = Number(val);
+        const compareVal = isNaN(num) ? val : num;
+        
+        const originalLength = rows.length;
+        rows = rows.filter(row => row[col] != compareVal);
+        deletedCount = originalLength - rows.length;
+      }
+    } else {
+      // Delete all rows if no WHERE clause
+      deletedCount = rows.length;
+      rows = [];
+    }
+
+    saveTable(tableName, rows);
+    return `${deletedCount} row(s) deleted from ${tableName}`;
+  }
+
   if (sql.toUpperCase() === "SHOW TABLES") {
     const schema = loadSchema();
     return Object.keys(schema);
@@ -131,4 +236,4 @@ function execute(sql) {
 }
 
 module.exports = { execute };
-EOF
+

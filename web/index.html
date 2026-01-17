@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-DB Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗄️ Micro-DB Manager</h1>
+            <p>A simple relational database management system</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="query">SQL Query</button>
+            <button class="tab" data-tab="tables">Tables</button>
+            <button class="tab" data-tab="create">Create Table</button>
+            <button class="tab" data-tab="help">Help</button>
+        </nav>
+
+        <main>
+            <!-- SQL Query Tab -->
+            <section id="query" class="tab-content active">
+                <h2>Execute SQL Query</h2>
+                <div class="query-container">
+                    <textarea id="sqlInput" placeholder="Enter your SQL query here...&#10;&#10;Examples:&#10;SELECT * FROM users WHERE id = 1&#10;INSERT INTO users (name, email) VALUES ('John', 'john@example.com')&#10;UPDATE users SET name = 'Jane' WHERE id = 1&#10;DELETE FROM users WHERE id = 1"></textarea>
+                    <div class="button-group">
+                        <button onclick="executeQuery()" class="btn primary">Execute Query</button>
+                        <button onclick="clearQuery()" class="btn secondary">Clear</button>
+                    </div>
+                </div>
+                <div id="queryResult" class="result-container"></div>
+            </section>
+
+            <!-- Tables Tab -->
+            <section id="tables" class="tab-content">
+                <h2>Database Tables</h2>
+                <div class="tables-controls">
+                    <button onclick="loadTables()" class="btn primary">Refresh Tables</button>
+                    <button onclick="dropTable()" class="btn danger">Drop Table</button>
+                </div>
+                <div id="tablesList" class="tables-list"></div>
+                <div id="tableData" class="table-data"></div>
+            </section>
+
+            <!-- Create Table Tab -->
+            <section id="create" class="tab-content">
+                <h2>Create New Table</h2>
+                <div class="create-form">
+                    <div class="form-group">
+                        <label for="tableName">Table Name:</label>
+                        <input type="text" id="tableName" placeholder="Enter table name">
+                    </div>
+                    <div class="form-group">
+                        <label>Columns:</label>
+                        <div id="columnsContainer">
+                            <div class="column-row">
+                                <input type="text" class="col-name" placeholder="Column name">
+                                <select class="col-type">
+                                    <option value="TEXT">TEXT</option>
+                                    <option value="NUMBER">NUMBER</option>
+                                    <option value="INTEGER">INTEGER</option>
+                                    <option value="BOOLEAN">BOOLEAN</option>
+                                    <option value="DATE">DATE</option>
+                                </select>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="col-primary"> Primary Key
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="col-unique"> Unique
+                                </label>
+                                <button onclick="removeColumn(this)" class="btn small danger">✕</button>
+                            </div>
+                        </div>
+                        <button onclick="addColumn()" class="btn secondary">+ Add Column</button>
+                    </div>
+                    <button onclick="createTable()" class="btn primary">Create Table</button>
+                </div>
+            </section>
+
+            <!-- Help Tab -->
+            <section id="help" class="tab-content">
+                <h2>SQL Help & Examples</h2>
+                <div class="help-content">
+                    <div class="help-section">
+                        <h3>CREATE TABLE</h3>
+                        <pre>CREATE TABLE table_name (
+    column1_name column1_type,
+    column2_name column2_type,
+    ...
+)</pre>
+                        <p><strong>Supported Types:</strong> TEXT, NUMBER, INTEGER, BOOLEAN, DATE</p>
+                        <p><strong>Example:</strong></p>
+                        <pre>CREATE TABLE users (
+    id INTEGER,
+    name TEXT,
+    email TEXT,
+    age NUMBER
+)</pre>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>INSERT INTO</h3>
+                        <pre>INSERT INTO table_name (columns...) VALUES (values...)</pre>
+                        <p><strong>Example:</strong></p>
+                        <pre>INSERT INTO users (id, name, email, age) VALUES 
+(1, 'John Doe', 'john@example.com', 30)</pre>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>SELECT</h3>
+                        <pre>SELECT columns FROM table_name [WHERE condition]</pre>
+                        <p><strong>Examples:</strong></p>
+                        <pre>SELECT * FROM users
+SELECT name, email FROM users WHERE age > 25
+SELECT * FROM users WHERE id = 1</pre>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>UPDATE</h3>
+                        <pre>UPDATE table_name SET column1=value1, ... [WHERE condition]</pre>
+                        <p><strong>Example:</strong></p>
+                        <pre>UPDATE users SET name = 'Jane', age = 28 WHERE id = 1</pre>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>DELETE FROM</h3>
+                        <pre>DELETE FROM table_name [WHERE condition]</pre>
+                        <p><strong>Examples:</strong></p>
+                        <pre>DELETE FROM users WHERE id = 1
+DELETE FROM users (deletes all rows)</pre>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>Other Commands</h3>
+                        <pre>SHOW TABLES
+DESCRIBE table_name</pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Micro-DB Manager - A Simple Relational Database</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "micro-db",
+  "version": "1.0.0",
+  "description": "A simple relational database management system with web interface",
+  "main": "db/server/index.js",
+  "scripts": {
+    "start": "node db/server/index.js",
+    "repl": "node db/data/repl.js",
+    "dev": "node db/server/index.js"
+  },
+  "keywords": ["database", "rdbms", "sql", "education"],
+  "author": "Micro-DB Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

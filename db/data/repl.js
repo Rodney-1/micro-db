@@ -1,4 +1,3 @@
-cat > db/repl.js << 'EOF'
 const readline = require("readline");
 const { execute } = require("./engine");
 
@@ -50,4 +49,4 @@ rl.on("close", () => {
   console.log("\nGoodbye!");
   process.exit(0);
 });
-EOF
+
