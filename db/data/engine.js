@@ -1,9 +1,9 @@
+cat > db/engine.js << 'EOF'
 const { loadSchema, saveSchema, createTable, loadTable, saveTable } = require("./storage");
 
 function execute(sql) {
   sql = sql.trim();
 
-  // CREATE TABLE
   if (sql.toUpperCase().startsWith("CREATE TABLE")) {
     const match = sql.match(/CREATE TABLE (\w+) \((.+)\)/i);
     if (!match) throw new Error("Invalid CREATE TABLE syntax");
@@ -31,7 +31,6 @@ function execute(sql) {
     return `Table ${tableName} created`;
   }
 
-  // INSERT INTO
   if (sql.toUpperCase().startsWith("INSERT INTO")) {
     const match = sql.match(/INSERT INTO (\w+) \(([^)]+)\) VALUES \(([^)]+)\)/i);
     if (!match) throw new Error("Invalid INSERT syntax");
@@ -40,12 +39,10 @@ function execute(sql) {
     const colNames = match[2].split(",").map(c => c.trim());
     const values = match[3].split(",").map(v => {
       v = v.trim();
-      // Remove quotes if present
       if ((v.startsWith("'") && v.endsWith("'")) || 
           (v.startsWith('"') && v.endsWith('"'))) {
         return v.slice(1, -1);
       }
-      // Try to parse as number
       const num = Number(v);
       return isNaN(num) ? v : num;
     });
@@ -67,7 +64,6 @@ function execute(sql) {
     return `1 row inserted into ${tableName}`;
   }
 
-  // SELECT
   if (sql.toUpperCase().startsWith("SELECT")) {
     const match = sql.match(/SELECT (.+) FROM (\w+)(?:\s+WHERE (.+))?/i);
     if (!match) throw new Error("Invalid SELECT syntax");
@@ -83,7 +79,6 @@ function execute(sql) {
 
     let rows = loadTable(tableName);
 
-    // Apply WHERE filter
     if (whereClause) {
       const condMatch = whereClause.match(/(\w+)\s*=\s*(.+)/);
       if (condMatch) {
@@ -100,7 +95,6 @@ function execute(sql) {
       }
     }
 
-    // Select columns
     if (cols === "*") {
       return rows;
     } else {
@@ -115,13 +109,11 @@ function execute(sql) {
     }
   }
 
-  // SHOW TABLES
   if (sql.toUpperCase() === "SHOW TABLES") {
     const schema = loadSchema();
     return Object.keys(schema);
   }
 
-  // DESCRIBE
   if (sql.toUpperCase().startsWith("DESCRIBE") || sql.toUpperCase().startsWith("DESC")) {
     const match = sql.match(/DESC(?:RIBE)?\s+(\w+)/i);
     if (!match) throw new Error("Invalid DESCRIBE syntax");
@@ -139,3 +131,4 @@ function execute(sql) {
 }
 
 module.exports = { execute };
+EOF

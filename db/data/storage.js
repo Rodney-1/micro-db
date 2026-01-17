@@ -1,15 +1,14 @@
+cat > db/storage.js << 'EOF'
 const fs = require("fs");
 const path = require("path");
 
 const dataDir = path.join(__dirname, "data");
 const schemaPath = path.join(dataDir, "schema.json");
 
-// Ensure data directory exists
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// Ensure schema.json exists
 if (!fs.existsSync(schemaPath)) {
   fs.writeFileSync(schemaPath, JSON.stringify({}, null, 2));
 }
@@ -50,3 +49,4 @@ module.exports = {
   loadTable,
   saveTable
 };
+EOF
